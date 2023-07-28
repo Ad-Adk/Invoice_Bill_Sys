@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from datetime import date
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
@@ -14,13 +13,11 @@ from gspread_dataframe import set_with_dataframe
 
 st.title("Enter Details for Invoice")
 
-# Get the current date for the invoice
-invoice_date = date.today()
-
 # Get user input for customer details
 name = st.text_input('Your Name')
 phno = st.text_input('Enter your Phone Number')
 email = st.text_input('Enter Your Email-ID')
+invoice_date = st.date_input('Date')
 ad = st.text_area("Billing Address")
 
 # Predefined list of items
