@@ -5,7 +5,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.platypus.flowables import Flowable
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 import gspread
 from gspread_dataframe import set_with_dataframe
 
@@ -19,6 +19,7 @@ phno = st.text_input('Enter your Phone Number')
 email = st.text_input('Enter Your Email-ID')
 invoice_date = st.date_input('Date')
 ad = st.text_area("Billing Address")
+
 
 # Predefined list of items
 predefined_items = ['Eggs','Milk','Bread','Chocolates','Coffee','Fruits','Protien Bar','Butter','Cake','Cheese']
@@ -83,34 +84,72 @@ if st.button('Next'):
         # Generate the PDF invoice
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
-        elements = []
-
-        # Add the invoice details to the PDF
-        elements.append(Paragraph(f'##### Customer ID = {cust_id}', getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph(f'##### Invoice Date = {invoice_date}', getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph("Transtag Lifecycle pvt. ltd.", getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph("A-105, RIDGEWOOD ESTATE", getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph("DLF PHASE IV", getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph("GURGAON - 122001", getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph("Haryana", getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph('<p class="line-spacing">------------------------------------------------------------</p>', getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph("Bill To", getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph(f"Name: {name}", getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph(f"Phone Number: {phno}", getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph(f"Billing Address: {ad}", getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph(f"Mode of Payement: {mop}", getSampleStyleSheet()["Normal"]))
         
+        # Get the sample stylesheet
+        styles = getSampleStyleSheet()
+
+        # Custom styles for the invoice
+        invoice_title_style = ParagraphStyle(
+            'InvoiceTitleStyle',
+            parent=styles['Title'],
+            fontSize=24,
+            textColor='blue',
+            spaceAfter=10,
+        )
+
+        separator_style = ParagraphStyle(
+            'SeparatorStyle',
+            parent=styles['Normal'],
+            fontSize=12,
+            textColor='gray',
+            spaceAfter=5,
+        )
+
+        header_style = ParagraphStyle(
+            'HeaderStyle',
+            parent=styles['Heading2'],
+            fontSize=14,
+            textColor='black',
+            spaceAfter=5,
+        )
+
+        subtotal_style = ParagraphStyle(
+            'SubtotalStyle',
+            parent=styles['Heading3'],
+            fontSize=14,
+            textColor='darkblue',
+            spaceAfter=10,
+        )
+
+        # Sample data for the invoice
+        elements = []
+        elements.append(Paragraph('Invoice', invoice_title_style))
+        elements.append(Paragraph(f'Customer ID: {cust_id}', styles['Normal']))
+        elements.append(Paragraph(f'Invoice Date: {invoice_date}', styles['Normal']))
+        elements.append(Paragraph("Transtag Lifecycle pvt. ltd.", header_style))
+        elements.append(Paragraph("A-105, RIDGEWOOD ESTATE", styles['Normal']))
+        elements.append(Paragraph("DLF PHASE IV", styles['Normal']))
+        elements.append(Paragraph("GURGAON - 122001", styles['Normal']))
+        elements.append(Paragraph("Haryana", styles['Normal']))
+        elements.append(Paragraph('<p class="line-spacing">------------------------------------------------------------</p>', separator_style))
+        elements.append(Paragraph("Bill To", header_style))
+        elements.append(Paragraph(f"Name: {name}", styles['Normal']))
+        elements.append(Paragraph(f"Phone Number: {phno}", styles['Normal']))
+        elements.append(Paragraph(f"Billing Address: {ad}", styles['Normal']))
+        elements.append(Paragraph(f"Mode of Payment: {mop}", styles['Normal']))
+
+
         # Convert the DataFrame to a list of lists for the Flowable
         df_data = [df.columns.to_list()] + df.values.tolist()
         
         # Render the DataFrame as a table using the custom Flowable
         elements.append(DataFrameTable(df_data))
-        elements.append(Paragraph(f"subtotal = {stotal}", getSampleStyleSheet()["Normal"]))
-        elements.append(Paragraph(f"## Thank You", getSampleStyleSheet()["Normal"]))
+        elements.append(Paragraph(f"Subtotal = {stotal}",header_style))
+        elements.append(Paragraph(f"Thank You", subtotal_style))
 
         col3, col4, col5 = st.columns(3)
         with col5:
-            st.markdown(f'####  subtotal = {stotal}')
+            st.markdown(f'####  Subtotal = {stotal}')
         with col3:
             st.markdown('## Thank You')
 
@@ -168,3 +207,6 @@ if st.button('Next'):
 
 
    
+
+
+
